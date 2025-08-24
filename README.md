@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Task 1 – S3 Static Website Hosting with IAM User
 📌 Project Overview
 
@@ -136,3 +137,6 @@ Documentation → This README file is structured, clear, and comprehensive.
 🔹 Bonus (Optional for Task 1): Integrate with CloudFront for better performance, HTTPS support, and global caching.
 
 Do you want me to now prepare a Task 2 README.md that covers VPC, subnets, route tables, and IAM policy in the same detailed structure?
+=======
+# cloudlaunch
+>>>>>>> fa4e829dc44480a17946e6dd178e494be9484bd0
