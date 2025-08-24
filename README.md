@@ -1,34 +1,27 @@
-<<<<<<< HEAD
-Task 1 – S3 Static Website Hosting with IAM User
-📌 Project Overview
+# CloudLaunch AWS Infrastructure Setup
 
-This task demonstrates how to set up a static website using Amazon S3 and manage access using AWS IAM. The setup follows the principle of least privilege to ensure security while providing necessary functionality.
+A platform that showcases a basic company website and stores some internal private documents.
 
-By the end of this task, you will have:
+---
 
-An S3 bucket hosting a static website.
+## Task 1: AWS S3 Static Website Hosting with IAM Permissions
 
-A working static site link.
+### 📌 Overview
+This task involved setting up a static website hosted on **Amazon S3**, securing access with an **IAM user**, and enforcing **least privilege** principles. The goal was to deploy a simple static website and provide controlled access via IAM, ensuring that only the required resources are accessible.
 
-An IAM user (cloudlaunch-user) with restricted permissions.
+---
 
-A JSON policy that limits access only to S3 and its resources.
+### ✅ Steps Completed
 
-Credentials and login details for the IAM user.
+#### 1. Create and Configure an S3 Bucket
+- Created an S3 bucket named: `cloudlaunch-site-bucket-libby`.
+- Enabled **static website hosting** on the bucket.
+- Configured the **index document** as `index.html` and an `error.html`.
 
-🛠️ Step-by-Step Setup
-1. Create the S3 Bucket
+#### 2. Bucket Policy (Public Access for Website Content)
+Attached a bucket policy to allow **public read access** for objects:
 
-Bucket Name: cloudlaunch-bucket
-
-Region: (e.g., us-east-1)
-
-Block Public Access: Disabled (to allow public site hosting).
-
-Bucket Policy: Added to permit public read access for objects.
-
-Example bucket policy:
-
+```json
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -37,106 +30,104 @@ Example bucket policy:
       "Effect": "Allow",
       "Principal": "*",
       "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::cloudlaunch-bucket/*"
+      "Resource": "arn:aws:s3:::cloudlaunch-site-bucket-libby/*"
     }
   ]
 }
+```
 
-2. Enable Static Website Hosting
+- Block Public Access was modified to allow static hosting.
+- Verified that the website is publicly accessible.
 
-Navigate to the bucket → Properties → Static website hosting.
+#### 3. IAM User Creation
+- Created an IAM user: `cloudlaunch-user-libby`.
+- Configured programmatic access (Access Key & Secret Key).
+- Attached a custom IAM policy to restrict access.
 
-Choose Enable.
+#### 4. IAM Policy for S3 Read-Only Access
+Attached the following JSON IAM Policy to `cloudlaunch-user-libby` to grant read-only access to the S3 static site:
 
-Set Index document = index.html.
-
-Upload your website files (e.g., index.html, style.css).
-
-3. Verify the Website
-
-Once enabled, AWS provides a URL for the site.
-
-Example:
-
-http://cloudlaunch-bucket.s3-website-us-east-1.amazonaws.com
-
-4. Create IAM User (cloudlaunch-user)
-
-User name: cloudlaunch-user
-
-Access type: AWS Management Console access.
-
-Console password: Auto-generated, with require password reset on first login enabled.
-
-5. Create Custom IAM Policy
-
-The user should have read-only access to the S3 bucket and its contents.
-
-Policy Name: cloudlaunch-s3-readonly
-Policy JSON:
-
+```json
 {
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "S3ListBucket",
-      "Effect": "Allow",
-      "Action": [
-        "s3:ListAllMyBuckets",
-        "s3:ListBucket"
-      ],
-      "Resource": [
-        "arn:aws:s3:::cloudlaunch-bucket"
-      ]
-    },
-    {
-      "Sid": "S3GetObjects",
       "Effect": "Allow",
       "Action": [
         "s3:GetObject",
-        "s3:GetObjectAcl"
+        "s3:ListBucket"
       ],
       "Resource": [
-        "arn:aws:s3:::cloudlaunch-bucket/*"
+        "arn:aws:s3:::cloudlaunch-static-site",
+        "arn:aws:s3:::cloudlaunch-static-site/*"
       ]
     }
   ]
 }
+```
 
+This ensures cloudlaunch-user can only view objects inside the S3 bucket. No write, delete, or admin privileges are granted.
 
-Attach this policy to the cloudlaunch-user.
+#### 5. Enforce Secure Login
+- Generated login credentials for `cloudlaunch-user-libby`.
+- Configured to force password reset on first login.
+- Restricted permissions to follow least privilege best practices.
 
-🔗 Links & Credentials
+### 🔗 Website Links
 
-Static Site URL:
-http://cloudlaunch-bucket.s3-website-us-east-1.amazonaws.com
+**S3 Static Website URL:**  
+[http://cloudlaunch-site-bucket-libby.s3-website.eu-north-1.amazonaws.com/](http://cloudlaunch-site-bucket-libby.s3-website.eu-north-1.amazonaws.com/)
 
-AWS Console URL:
-https://<your-account-alias>.signin.aws.amazon.com/console
+**CloudFront Distribution URL:**  
+[https://dcw22a8973hj8.cloudfront.net/](https://dcw22a8973hj8.cloudfront.net/)
 
-IAM User:
+---
 
-Username: cloudlaunch-user
+## Task 2 – VPC and Subnet Configuration
 
-Password: [provided separately]
+### Overview
 
-Enforced: Change password on first login
+In this task, I created a custom **Virtual Private Cloud (VPC)** to host both public and private resources for the CloudLaunch project. The goal was to design a secure and scalable networking architecture that separates internet-facing resources from internal-only resources.
 
-✅ Evaluation Criteria Mapping
+The following steps were carried out:
 
-Clarity of setup → Step-by-step walkthrough provided.
+### 1. VPC Creation
 
-Best practices → IAM least privilege applied.
+* Created a VPC named **cloudlaunch-vpc** with the CIDR block **10.0.0.0/16**.
+* This allows up to **65,536 private IP addresses**, giving enough room for subnetting.
 
-Policy definitions → Clean, formatted JSON included.
+### 2. Public Subnets
 
-Output → Working S3 website link.
+I created two **public subnets** that will host internet-facing resources such as load balancers or a bastion host.
 
-Documentation → This README file is structured, clear, and comprehensive.
+* **cloudlaunch-public-subnet-1** → CIDR: `10.0.1.0/24` (Availability Zone 1)
+* **cloudlaunch-public-subnet-2** → CIDR: `10.0.2.0/24` (Availability Zone 2)
 
-🔹 Bonus (Optional for Task 1): Integrate with CloudFront for better performance, HTTPS support, and global caching.
+✅ These subnets are associated with a **route table** that routes traffic to an **Internet Gateway (IGW)**, making them public.
 
-Do you want me to now prepare a Task 2 README.md that covers VPC, subnets, route tables, and IAM policy in the same detailed structure?
-=======
-# cloudlaunch
->>>>>>> fa4e829dc44480a17946e6dd178e494be9484bd0
+### 3. Private Subnets
+
+I created two **private subnets** that will host backend resources such as application servers and databases.
+
+* **cloudlaunch-private-subnet-1** → CIDR: `10.0.3.0/24` (Availability Zone 1)
+* **cloudlaunch-private-subnet-2** → CIDR: `10.0.4.0/24` (Availability Zone 2)
+
+✅ These subnets **do not** have a direct route to the internet. Instead, they communicate externally via a **NAT Gateway** deployed in the public subnet.
+
+### 4. Route Tables and Internet Gateway
+
+* Attached an **Internet Gateway (IGW)** to the VPC for external access.
+* Created a **Public Route Table** and associated it with the two public subnets. This table contains a default route (`0.0.0.0/0`) pointing to the IGW.
+* Created a **Private Route Table** and associated it with the two private subnets. This table contains a default route (`0.0.0.0/0`) pointing to the **NAT Gateway**.
+
+### 5. Security Groups
+
+* Created a **Public SG** (for load balancer/bastion) allowing inbound **HTTP (80), HTTPS (443), and SSH (22)** from trusted IPs.
+* Created a **Private SG** (for app servers/DB) allowing inbound traffic **only from the public SG** and **within private subnet communication**.
+
+### 6. Verification
+
+* Verified that resources in the **public subnet** are internet accessible.
+* Verified that resources in the **private subnet** cannot be reached directly from the internet, but can access the internet via NAT for updates and dependencies.
+
+---
