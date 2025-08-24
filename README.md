@@ -81,6 +81,8 @@ This ensures cloudlaunch-user can only view objects inside the S3 bucket. No wri
 **CloudFront Distribution URL:**  
 [https://dcw22a8973hj8.cloudfront.net/](https://dcw22a8973hj8.cloudfront.net/)
 
+![Cloudlaunch Screenshot](cloudlaunch.png)
+
 ---
 
 ## Task 2 – VPC and Subnet Configuration
